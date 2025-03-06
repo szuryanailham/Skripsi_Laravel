@@ -106,5 +106,37 @@ class EventsController extends Controller
             ], 500);
         }
     }
+
+    public function userAllEvents()
+    {
+        try {
+            $events = events::all();
+            return response()->json([
+                'status' => 'success',
+                'data' => $events,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    public function DetailEvents($slug)
+    {
+        try {
+            $event = events::where('slug', $slug)->firstOrFail();
+            return response()->json([
+                'status' => 'success',
+                'data' => $event,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => 'error',
+                'message' => $e->getMessage(),
+            ], 500);
+        }
+    }
     
 }
