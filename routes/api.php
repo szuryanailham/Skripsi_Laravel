@@ -16,6 +16,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/{slug}/detail', [EventsController::class, 'DetailEvents']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::get('/orders/{id}', [OrderController::class, 'show']);
+    Route::delete('/orders/{id}', [OrderController::class, 'delete']);
     Route::get('/user/order', [OrderController::class, 'userOrders']);
     Route::get('/orders/{id}/ticket', [OrderController::class, 'printTicket']);
 
@@ -23,6 +24,8 @@ Route::middleware('auth:sanctum')->group(function () {
 // admin routes
     Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::apiResource('/admin/events', EventsController::class);
+    Route::get('/admin/orders', [OrderController::class, 'allOrderAdmin']);
+    Route::put('/orders/{id}/verification', [OrderController::class, 'verify']);
     });
 });
 

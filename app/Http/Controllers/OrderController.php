@@ -79,5 +79,39 @@ class OrderController extends Controller
             ]
         ]);
     }
+
+    public function allOrderAdmin(){
+        try {
+            $orders = Order::with('user', 'event')->get();
+            return response()->json($orders);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to retrieve orders.'], 500);
+        }
+    }
+
+    public function verify($id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+            $order->status = 'completed';
+            $order->save();
+
+            return response()->json(['message' => 'Order verified successfully', 'order' => $order]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Order not found or verification failed.'], 404);
+        }
+    }
+
+    public function delete($id)
+    {
+        try {
+            $order = Order::where('id', $id)->where('user_id', Auth::id())->firstOrFail();
+            $order->delete();
+
+            return response()->json(['message' => 'Order deleted successfully']);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Order not found or you do not have access to delete this order.'], 404);
+        }
+    }
     
 }
