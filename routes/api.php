@@ -9,8 +9,8 @@ use Illuminate\Support\Facades\Route;
 Route::prefix('api')->group(function () {
 Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('user/events', [EventsController::class, 'userAllEvents']);
-Route::middleware('auth:sanctum')->post('/logout', [AuthController::class, 'logout']);
  // User routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/events/{slug}/detail', [EventsController::class, 'DetailEvents']);
