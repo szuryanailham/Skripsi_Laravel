@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\EventsController;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\TiketController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -19,6 +20,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/orders/{id}', [OrderController::class, 'delete']);
     Route::get('/user/order', [OrderController::class, 'userOrders']);
     Route::get('/orders/{id}/ticket', [OrderController::class, 'printTicket']);
+    Route::get('/download-tiket/{id}', [TiketController::class, 'download'])->name('tiket.download');
+
 
     });
 // admin routes
