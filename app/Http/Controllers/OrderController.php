@@ -5,12 +5,40 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class OrderController extends Controller
 {
     // Membuat order baru
-    public function store(Request $request)
-    {
+
+    
+    public function index(){
+        try {
+            $orders = Order::with('user', 'event')->get();
+            return response()->json($orders);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Failed to retrieve orders.'], 500);
+        }
+    }
+
+public function store(Request $request)
+{
+    // Validasi input
+    $validator = Validator::make($request->all(), [
+        'event_id' => 'required|exists:events,id',
+        'total_amount' => 'required|numeric|min:0',
+    ]);
+
+    // Jika validasi gagal
+    if ($validator->fails()) {
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422);
+    }
+
+    try {
+        // Simpan data order
         $order = Order::create([
             'order_number' => 'ORD-' . now()->timestamp,
             'user_id' => Auth::id(),
@@ -23,7 +51,16 @@ class OrderController extends Controller
             'message' => 'Order created successfully',
             'order' => $order
         ], 201);
+
+    } catch (\Exception $e) {
+        // Tangani error tak terduga
+        return response()->json([
+            'message' => 'Failed to create order',
+            'error' => $e->getMessage()
+        ], 500);
     }
+}
+
 
     // Melihat detail order
     public function show($id)
@@ -80,27 +117,8 @@ class OrderController extends Controller
         ]);
     }
 
-    public function allOrderAdmin(){
-        try {
-            $orders = Order::with('user', 'event')->get();
-            return response()->json($orders);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Failed to retrieve orders.'], 500);
-        }
-    }
 
-    public function verify($id)
-    {
-        try {
-            $order = Order::findOrFail($id);
-            $order->status = 'completed';
-            $order->save();
 
-            return response()->json(['message' => 'Order verified successfully', 'order' => $order]);
-        } catch (\Exception $e) {
-            return response()->json(['message' => 'Order not found or verification failed.'], 404);
-        }
-    }
 
     public function delete($id)
     {

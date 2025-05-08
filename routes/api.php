@@ -27,7 +27,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // admin routes
     Route::middleware(['auth:sanctum', 'isAdmin'])->group(function () {
     Route::apiResource('/admin/events', EventsController::class);
-    Route::get('/admin/orders', [OrderController::class, 'allOrderAdmin']);
+    Route::get('/admin/orders', [OrderController::class, 'index']);
     Route::put('/orders/{id}/verification', [OrderController::class, 'verify']);
     });
 });
