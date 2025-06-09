@@ -61,6 +61,19 @@ public function store(Request $request)
     }
 }
 
+ public function verify($id)
+    {
+        try {
+            $order = Order::findOrFail($id);
+            $order->status = 'completed';
+            $order->save();
+
+            return response()->json(['message' => 'Order verified successfully', 'order' => $order]);
+        } catch (\Exception $e) {
+            return response()->json(['message' => 'Order not found or verification failed.'], 404);
+        }
+    }
+    
 
     // Melihat detail order
     public function show($id)
@@ -131,5 +144,30 @@ public function store(Request $request)
             return response()->json(['message' => 'Order not found or you do not have access to delete this order.'], 404);
         }
     }
+
+public function uploadProof(Request $request, $id)
+{
+    // Konversi ID ke integer
+    $id = (int) $id;
+
+    // Validasi file
+    $request->validate([
+        'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+    ]);
+
+    // Cari order
+    $order = Order::findOrFail($id);
+    // Simpan gambar
+    $path = $request->file('proof_image')->store('proofs', 'public');
+    $order->proof_image = $path;
+    $order->save();
+
+    // Response sukses
+    return response()->json([
+        'message' => 'Bukti pembayaran berhasil diunggah.',
+        'order' => $order
+    ]);
+}
+
     
 }

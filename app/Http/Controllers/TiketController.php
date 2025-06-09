@@ -18,13 +18,11 @@ class TiketController extends Controller
     
             $pdf = Pdf::loadView('pdf.tiket', compact('order'));
             $fileName = 'tiket-'.$order->id.'.pdf';
-            $filePath = 'tiket/' . $fileName; // Ini relatif ke 'storage/app/public'
+            $filePath = 'tiket/' . $fileName;
     
-            // Simpan file di storage/app/public/tiket
             Storage::disk('public')->put($filePath, $pdf->output());
-    
-            // URL akses publik
-            $url = asset('storage/' . $filePath); // otomatis mengarah ke public/storage
+
+            $url = asset('storage/' . $filePath);
     
             return response()->json([
                 'success' => true,

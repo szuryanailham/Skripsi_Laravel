@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\events;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreEventRequest;
+use Illuminate\Validation\ValidationException;
 class EventsController extends Controller
 {
     /**
@@ -68,24 +69,40 @@ class EventsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(StoreEventRequest $request, Events $event)
+public function update(Request $request, Events $event)
 {
+    try {
+        // Validasi data hanya jika field dikirimkan
+        $validated = $request->validate([
+            'title' => 'sometimes|string|max:255',
+            'slug' => 'sometimes|string|max:255|unique:events,slug,' . $event->id,
+            'price' => 'sometimes|numeric',
+            'date' => 'sometimes|date',
+            'location' => 'sometimes|string|max:255',
+            'description' => 'sometimes|string',
+        ]);
 
-    $event->update([
-        'title' => $request->title,
-        'slug' => $request->slug,
-        'price' => $request->price,
-        'date' => $request->date,
-        'location' => $request->location,
-        'description' => $request->description,
-    ]);
+        // Update hanya field yang dikirim
+        $event->fill($validated)->save();
 
+        return response()->json([
+            'message' => 'Event updated successfully',
+            'event' => $event
+        ], 200);
 
-    // Kembalikan respons sukses
-    return response()->json([
-        'message' => 'Event updated successfully',
-        'event' => $event
-    ], 200);
+    } catch (ValidationException $e) {
+        // Jika validasi gagal
+        return response()->json([
+            'message' => 'Validation failed',
+            'errors' => $e->errors(),
+        ], 422);
+    } catch (\Exception $e) {
+        // Jika terjadi error lain
+        return response()->json([
+            'message' => 'Failed to update event',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
 }
 
 

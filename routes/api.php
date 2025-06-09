@@ -20,6 +20,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/orders/{id}', [OrderController::class, 'delete']);
     Route::get('/user/order', [OrderController::class, 'userOrders']);
     Route::get('/orders/{id}/ticket', [OrderController::class, 'printTicket']);
+    Route::post('/orders/{id}/upload-proof', [OrderController::class, 'uploadProof']);
     Route::get('/download-tiket/{id}', [TiketController::class, 'download'])->name('tiket.download');
 
 
