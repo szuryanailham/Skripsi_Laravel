@@ -33,6 +33,7 @@ class AuthController extends Controller
             return response()->json([
                 'message' => 'User registered successfully',
                 'token' => $token,
+                'role' => $user->role, 
                 'user' => $user,
             ], 201);
         } catch (ValidationException $e) {

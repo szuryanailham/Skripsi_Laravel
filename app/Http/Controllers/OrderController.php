@@ -149,7 +149,6 @@ public function uploadProof(Request $request, $id)
 {
     // Konversi ID ke integer
     $id = (int) $id;
-
     // Validasi file
     $request->validate([
         'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',

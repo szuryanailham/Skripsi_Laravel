@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\events;
+use App\Models\Events;
 use Illuminate\Http\Request;
 use App\Http\Requests\StoreEventRequest;
 use Illuminate\Validation\ValidationException;
@@ -124,10 +124,11 @@ public function update(Request $request, Events $event)
         }
     }
 
-    public function userAllEvents()
+     public function userAllEvents()
     {
         try {
-            $events = events::all();
+            $events = Events::all();
+
             return response()->json([
                 'status' => 'success',
                 'data' => $events,
@@ -139,7 +140,6 @@ public function update(Request $request, Events $event)
             ], 500);
         }
     }
-
     public function DetailEvents($slug)
     {
         try {
