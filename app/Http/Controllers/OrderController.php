@@ -147,26 +147,40 @@ public function store(Request $request)
 
 public function uploadProof(Request $request, $id)
 {
-    // Konversi ID ke integer
-    $id = (int) $id;
-    // Validasi file
-    $request->validate([
+    // Validasi input
+    $validated = $request->validate([
         'proof_image' => 'required|image|mimes:jpeg,png,jpg|max:2048',
     ]);
 
-    // Cari order
-    $order = Order::findOrFail($id);
-    // Simpan gambar
-    $path = $request->file('proof_image')->store('proofs', 'public');
-    $order->proof_image = $path;
-    $order->save();
+    try {
+        $order = Order::findOrFail($id);
 
-    // Response sukses
-    return response()->json([
-        'message' => 'Bukti pembayaran berhasil diunggah.',
-        'order' => $order
-    ]);
+        // Simpan file bukti pembayaran
+        $file = $request->file('proof_image');
+        $path = $file->store('proofs', 'public');
+
+        // Simpan path ke database
+        $order->proof_image = $path;
+        $order->save();
+
+        return response()->json([
+            'message' => 'Bukti pembayaran berhasil diunggah.',
+            'order' => $order
+        ], 200);
+
+    } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+        return response()->json([
+            'message' => 'Order tidak ditemukan.',
+        ], 404);
+
+    } catch (\Exception $e) {
+        return response()->json([
+            'message' => 'Terjadi kesalahan saat mengunggah bukti.',
+            'error' => $e->getMessage(),
+        ], 500);
+    }
 }
+
 
     
 }

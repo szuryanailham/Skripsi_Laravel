@@ -38,7 +38,7 @@ class EventsController extends Controller
             return response()->json([
                 'status' => 'success',
                 'data' => $event,
-            ]);
+            ],201);
         } catch (\Exception $e) {
             return response()->json([
                 'status' => 'error',

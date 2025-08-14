@@ -167,6 +167,110 @@ public function it_returns_404_if_order_belongs_to_another_user()
              ]);
 }
 
+ #[\PHPUnit\Framework\Attributes\Test]
+public function it_deletes_order_successfully_if_owned_by_user()
+{
+    // Buat user dan login
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    // Buat event yang valid
+    $event = Events::factory()->create();
+
+    // Buat order milik user dengan event yang valid
+    $order = Order::factory()->create([
+        'user_id' => $user->id,
+        'event_id' => $event->id,
+    ]);
+
+    // Kirim permintaan DELETE
+    $response = $this->deleteJson("/api/orders/{$order->id}");
+
+    // Cek response dan database
+    $response->assertStatus(200)
+             ->assertJson([
+                 'message' => 'Order deleted successfully',
+             ]);
+
+    $this->assertDatabaseMissing('orders', ['id' => $order->id]);
+}
+
+ #[\PHPUnit\Framework\Attributes\Test]
+public function it_returns_404_if_order_does_not_exist()
+{
+    $user = User::factory()->create();
+    $this->actingAs($user);
+
+    // Tidak membuat order apapun, jadi ID ini pasti tidak ada
+    $nonExistentOrderId = 9999;
+
+    $response = $this->deleteJson("/api/orders/{$nonExistentOrderId}");
+
+    $response->assertStatus(404)
+             ->assertJson([
+                 'message' => 'Order not found or you do not have access to delete this order.',
+             ]);
+}
+
+ #[\PHPUnit\Framework\Attributes\Test]
+
+
+ public function it_returns_only_orders_belonging_to_the_authenticated_user()
+{
+    // Buat user dan event
+    $user = User::factory()->create();
+    $event = Events::factory()->create(); // Pastikan event tersedia
+
+    // Buat 2 order untuk user ini
+    $ordersForUser = Order::factory()->count(2)->create([
+        'user_id' => $user->id,
+        'event_id' => $event->id,
+    ]);
+
+    // Buat 1 order untuk user lain
+    $otherUser = User::factory()->create();
+    Order::factory()->create([
+        'user_id' => $otherUser->id,
+        'event_id' => $event->id,
+    ]);
+
+    // Auth sebagai user pertama
+    $this->actingAs($user);
+
+    // Hit endpoint /user/order
+    $response = $this->getJson('/api/user/order');
+
+    // Pastikan hanya order milik user yang tampil
+    $response->assertStatus(200)
+             ->assertJsonCount(2) // hanya 2 order yang milik user tersebut
+             ->assertJsonFragment([
+                 'user_id' => $user->id,
+             ]);
+}
+
+ #[\PHPUnit\Framework\Attributes\Test]
+
+     public function it_returns_empty_array_if_user_has_no_orders()
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user);
+
+        $response = $this->getJson('/api/user/order');
+
+        $response->assertStatus(200)
+                 ->assertJsonCount(0);
+    }
+
+
+  #[\PHPUnit\Framework\Attributes\Test]
+
+ public function it_returns_unauthorized_if_user_not_authenticated()
+    {
+        $response = $this->getJson('/api/user/order');
+
+        $response->assertStatus(401);
+    }
 
 
 }
